@@ -1,0 +1,42 @@
+.form {
+    margin: 0 auto;
+	text-align: center;
+    background-color: #a6f2ff;
+    height: 530px;
+    width: 720px;
+}
+
+h1 {
+    text-align: center;
+}
+
+h2 {
+    text-align: center;
+}
+
+.front {
+    margin: 2%;
+    float: left;
+}
+
+.is-hidden {
+	cursor: pointer;
+}
+
+.is-hidden p{
+    display: none;
+}
+
+.visible {
+    visibility: hidden;
+}
+
+.visible p {
+    display: none;
+}
+
+button {
+    background-color: #ffffff;
+    height: 25px;
+    width: 80px;
+}
