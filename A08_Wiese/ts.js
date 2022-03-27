@@ -5,6 +5,7 @@ var Canvas;
     window.addEventListener("load", handleLoad);
     let crc2;
     let canvas;
+    let beeArray = [];
     function handleLoad(_event) {
         canvas = document.getElementsByTagName("canvas")[0];
         crc2 = canvas.getContext("2d");
@@ -23,9 +24,28 @@ var Canvas;
         drawCloud(760, 150, "#F2EDE4");
         drawCloud(560, 200, "#F2EDE4");
         drawCloud(360, 40, "#D3EDE5");
+        drawBeehome();
         drawPoppy(550, 565);
         drawSunflower(960, 565);
         drawTulip(900, 600);
+        createBee();
+        window.setInterval(moveBee, 20);
+        function createBee() {
+            for (let i = 0; i < 10; i++) {
+                // console.log("create bee");
+                let bee = new Bee(0.8);
+                beeArray.push(bee);
+            }
+        }
+        function moveBee() {
+            // crc2.clearRect(0, 0, 900, 500);
+            // crc2.putImageData(imageData, 0, 0);
+            // console.log("movebee");
+            for (let bee of beeArray) {
+                bee.move(1 / 50); //20 ms = 1/50
+                bee.draw();
+            }
+        }
         for (var height = 450; height < 630; height += 2) {
             var randomFlower = Math.floor((Math.random() * 3));
             var width = Math.floor((Math.random() * 1100) - 10);
@@ -225,6 +245,42 @@ var Canvas;
         crc2.lineTo(_x + 20, _y + 21);
         crc2.closePath();
         crc2.fill();
+    }
+    function drawBeehome() {
+        crc2.restore();
+        //main house
+        crc2.beginPath();
+        crc2.arc(50, 300, 50, 0, 2 * Math.PI);
+        crc2.fillStyle = "#d3a259";
+        crc2.fill();
+        crc2.closePath();
+        //stripes
+        crc2.beginPath();
+        crc2.moveTo(5, 320);
+        crc2.lineTo(95, 320);
+        crc2.moveTo(0, 300);
+        crc2.lineTo(100, 300);
+        crc2.moveTo(5, 280);
+        crc2.lineTo(95, 280);
+        crc2.moveTo(22, 260);
+        crc2.lineTo(80, 260);
+        crc2.strokeStyle = "black";
+        crc2.lineWidth = 2;
+        crc2.stroke();
+        crc2.closePath();
+        //entrance
+        crc2.beginPath();
+        crc2.arc(50, 320, 10, 0, 2 * Math.PI);
+        crc2.fillStyle = "black";
+        crc2.fill();
+        crc2.closePath();
+        //Ast
+        crc2.beginPath();
+        // crc2.moveTo(0, 300);
+        crc2.fillStyle = "brown";
+        crc2.fillRect(0, 235, 100, 20);
+        crc2.closePath();
+        crc2.save();
     }
 })(Canvas || (Canvas = {}));
 //# sourceMappingURL=ts.js.map
