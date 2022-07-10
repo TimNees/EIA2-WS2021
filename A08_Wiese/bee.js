@@ -2,6 +2,9 @@
 var L09Blumenwiese;
 (function (L09Blumenwiese) {
     class Bee {
+        position;
+        velocity;
+        size;
         constructor(_size, _position) {
             // console.log("bee constructor");
             if (_position) //kein Vektor angegeben

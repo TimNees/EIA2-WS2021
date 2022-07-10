@@ -2,6 +2,8 @@
 var BlumenwieseClasses;
 (function (BlumenwieseClasses) {
     class Bienen {
+        position;
+        velocity;
         constructor(_position, _velocity) {
             this.position = new BlumenwieseClasses.Vector(0, -900);
             this.velocity = new BlumenwieseClasses.Vector(0, 0);

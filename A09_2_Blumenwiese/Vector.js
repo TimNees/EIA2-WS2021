@@ -2,6 +2,8 @@
 var BlumenwieseClasses;
 (function (BlumenwieseClasses) {
     class Vector {
+        x;
+        y;
         constructor(_x, _y) {
             this.set(_x, _y);
         }

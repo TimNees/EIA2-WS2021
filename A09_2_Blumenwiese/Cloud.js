@@ -2,6 +2,11 @@
 var BlumenwieseClasses;
 (function (BlumenwieseClasses) {
     class Cloud {
+        position;
+        velocity;
+        size;
+        x;
+        y;
         constructor(_position, _size, _velocity, _x, _y) {
             this.position = _position;
             this.velocity = _velocity;
