@@ -11,100 +11,220 @@ namespace GemuseKarten {
         CARROT
     }
 
+    //TODO Marktklasse erstellen mit neuen Preisen
     class Sapling {
         private saplingImgDir: string = "./Assets/Seeds/";
-        private imgNames: string[];
+        private imgPhaseNames: string[];
         private saplingType: SaplingType;
+        private saplingImage: HTMLImageElement;
+        private saplingPriceInCent: number;
+        private saplingGrowTimes: number[];
+        private field: number[];
+        private currentSaplingPhase: number;
+        private context: CanvasRenderingContext2D;
+        private canGrow: boolean;
 
-        constructor(imgNames: string[], saplingType: SaplingType) {
-            this.imgNames = imgNames;
+        constructor(
+            saplingType: SaplingType, saplingPriceInCent: number, saplingGrowTimes: number[],
+            field: number[], imgNames: string[], img: HTMLImageElement, context: CanvasRenderingContext2D
+        ) {
             this.saplingType = saplingType;
+            this.saplingPriceInCent = saplingPriceInCent;
+            this.saplingImage = img;
+            this.imgPhaseNames = new Array();
+            imgNames.forEach(imgName => {
+                this.imgPhaseNames.push(this.saplingImgDir + imgName + ".png");
+            });
+            this.saplingGrowTimes = saplingGrowTimes;
+            this.field = field;
+            this.currentSaplingPhase = 0;
+            this.context = context;
+            this.canGrow = true;
+            setInterval(() => { this.grow(); }, 1000);
+            setInterval(() => { this.dry(); }, 1000);
+            setInterval(() => { this.needsFertilizer(); }, 1000);
+            setInterval(() => { this.needsPesticide(); }, 1000);
+        }
+
+        public getImgPhaseNames(): string[] {
+            return this.imgPhaseNames;
+        }
+
+        public getSaplingType(): SaplingType {
+            return this.saplingType;
+        }
+
+        public getSaplingImage(): HTMLImageElement {
+            return this.saplingImage;
+        }
+
+        public getSaplingPriceInCent(): number {
+            return this.saplingPriceInCent;
+        }
+
+        public getSaplingGrowTimes() {
+            return this.saplingGrowTimes;
+        }
+
+        public getField() {
+            return this.field;
+        }
+
+        public getCurrentSaplingPhase() {
+            return this.currentSaplingPhase;
+        }
+
+        public setCanGrow(canGrow: boolean) {
+            this.canGrow = canGrow;
+        }
+
+        public increaseCurrentSaplingPhase(): void {
+            if (this.currentSaplingPhase < 4) {
+                this.currentSaplingPhase++;
+            }
+        }
+
+        public grow(): void {
+            if (this.currentSaplingPhase >= 3 || !this.canGrow) {
+                return;
+            }
+            console.log("grow: " + this.field);
+            this.currentSaplingPhase++;
+            setTimeout(() => { this.grow(); }, this.saplingGrowTimes[this.currentSaplingPhase]);
+            redraw(this.context);
+        }
+
+        public dry(): void {
+            let probability: number = 0.15;      //Prob * 100 ist die Chance, dass der Preis geändert wird. (20%)
+            let val: number = Math.random();
+            if (val <= probability) {
+                this.canGrow = false;
+                console.log("Setzling vertrocknet");
+            }
+        }
+
+        public needsFertilizer(): void {
+            let probability: number = 0.075;      //Prob * 100 ist die Chance, dass der Preis geändert wird. (20%)
+            let val: number = Math.random();
+            if (val <= probability) {
+                this.canGrow = false;
+                console.log("Braucht Dünger");
+            }
+        }
+
+        public needsPesticide(): void {
+            let probability: number = 0.05;      //Prob * 100 ist die Chance, dass der Preis geändert wird. (20%)
+            let val: number = Math.random();
+            if (val <= probability) {
+                this.canGrow = false;
+                console.log("Braucht Dünger");
+            }
         }
     }
 
-    let patch: SaplingType[][] = [
-        [SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY],
-        [SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY],
-        [SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY],
-        [SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY],
-        [SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY, SaplingType.EMPTY]
-    ];
 
+    const PATCH_COLS: number = 8;
+    const PATCH_ROWS: number = 5;
 
-    let currentCapital: number = 50;
-    let currentPriceRange: number = 0.60;
+    //===== Canvas-Konstanten ======
+    const CANVAS_WIDTH: number = 800;
+    const CANVAS_HEIGHT: number = 500;
+    const FIELD_SIZE: number = 100;
 
-
-    let fieldSize: number = 100;
-    let width: number = 800;
-    let height: number = 500;
+    //===== Canvas-Variablen =====
     let canvas: HTMLCanvasElement;
     let context: CanvasRenderingContext2D;
-    let currentSap: SaplingType = SaplingType.EMPTY;
-    let currentSapling: HTMLImageElement = undefined;
-    let currentSaplingImg: string = "";
-
-
+    let currentSaplingImg: HTMLImageElement = undefined;
     let currentTool: HTMLImageElement = undefined;
+    let chooserImages: HTMLImageElement[] = new Array();
 
 
+    let patch: Sapling[] = Array(40).fill(undefined);
+    let currentSaplingType: SaplingType = SaplingType.EMPTY;
 
-    let moneyCount: number = 50;
-    let pestizideAmount: number = 0;
-    let saplingAmount: number = 0;
+    //===== Markt-Variablen =====
+    let currentCapital: number = 50;
+    let currentPriceRange: number = 0.6;
+
     let fertilizerAmount: number = 0;
 
 
-    //TODO: Preisschwankungen bei 0.20 Cent, 0.40 Cent u nd 60
-    let pricePotato: number = 0.7;
+    //TODO: Variablen für andere Gemüse anlegen, und auskommentieren
 
-    let pricePotato20: number[] = [0.50, 0.70, 0.90];
-    let pricePotato40: number[] = [0.30, 0.70, 1.10];
-    let pricePotato60: number[] = [0.10, 0.70, 1.30];
+    let currentPriceCarrot: number = 60;
+    let maxPriceCarrot: number = 60;
+    let minPriceCarrot: number = 20;
 
-
-    let priceRedOnion: number = 0.6;
-    let priceMelon: number = 0.5;
-    let priceBeetRoot: number = 0.8;
-    let priceCarrot: number = 0.5;
-
-    let priceFertilizer: number = 0.5;
-    let pricePesticides: number = 0.5;
-    let priceSeeds: number = 0.5;
-
-    /*
-//VARIABLEN FÜR WACHSTUMSZEIT, BEDARF WASSER, BEDARF DÜNGER ETC //TODO:
-
-Potato
-let growingTime: number = 15s
-let needWater: number = 2;
-let needFertilizer: number =1;
+    let priceChangeRateMin: number = 1;
+    let priceChangeRateMax: number = 15;
 
 
+    /*let currentPricePotato: number; 
+    let currentPriceMelon: number;
+    
+    let currentPriceRedOnion: number;  
+    let currentPriceRedBeet: number;
     */
+
+    function calculatePrice(decreasePrice: boolean): void {
+        if (currentPriceCarrot >= maxPriceCarrot && !decreasePrice) {            //Max Price kann nicht erhöht werden & Min Price kann nicht verringert werden.
+            return;
+        }
+
+        if (currentPriceCarrot <= minPriceCarrot && decreasePrice) {
+            return;
+        }
+
+        let factor: number = 1;
+        if (decreasePrice) {
+            factor = -1;
+        }
+
+        let priceCarrotCash: HTMLElement = document.getElementById("priceCarrotCash");
+        let change: number = ((Math.floor(Math.random() * (priceChangeRateMax - priceChangeRateMin + 1)) + priceChangeRateMin));
+        currentPriceCarrot += change * factor;  //return Math.floor(Math.random() * (Maximale Preis - Minimalen Preis + 1) ) + minimalen Preis / 10 (Dezimalzahl)
+        priceCarrotCash.innerHTML = clamp(currentPriceCarrot, minPriceCarrot, maxPriceCarrot).toString();   //toFixed sorgt dafür, dass nur 2 Nachkommastellen angezeigt werden (Rundungsfehler)
+        console.log("change: " + change);
+        console.log(currentPriceCarrot);
+
+    }
+
+    function clamp(value: number, min: number, max: number): number {
+        if (value < min) {                                  //Wenn Wert kurzzeitig unter Min geht, wird er anschließend wieder auf den Mindestwert (20) gesetzt.
+            value = min;
+        }
+
+        if (value > max) {
+            value = max;
+        }
+        return value;
+    }
+
+
+    function handlePriceChange(): void {
+        let probability: number = 1;      //Prob * 100 ist die Chance, dass der Preis geändert wird. (20%)
+        let val: number = Math.random();
+        if (val <= probability) {
+            calculatePrice(true);
+        }
+    }
 
     //Alle Funktionen beim Starten der Seite Laden (Problem 08.07, ich musste alles Doppelt anklicken)
     window.onload = function (event: Event): void {
         handleCanvasClick(event);
+
+        //Sapling
         handlePotatoClick(event);
         handleCarrotClick(event);
         handleWaterMelonClick(event);
         handleBeetRootClick(event);
         handleRedOnionClick(event);
-        buyFertilizer(event);
-        buyPestizide(event);
-        buySaplings(event);
         selectHarvest(event);
         selectWatering(event);
         selectFortizize(event);
         selectFightPest(event);
-        chooseSellPotato(event);
-        chooseSellCarrot(event);
-        chooseSellMelon(event);
         addButtonEvent(event);
-        choosepricePotato(event);
         selectFertilizer(event);
-        selectPestizide(event);
         hideMainPage();
         init();
     };
@@ -129,6 +249,7 @@ let needFertilizer: number =1;
         let firstPage: HTMLDivElement = <HTMLDivElement>document.getElementById("settings");
         secondPage.style.display = "unset";                                                     //Das style Attribut wird bei den beiden DIVS vertauscht - Settings unsichbar - MainPage sichtbar
         firstPage.style.display = "none";
+        setInterval(handlePriceChange, 1000);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -139,12 +260,10 @@ let needFertilizer: number =1;
     //Kapital über Regler einstellen und Werte speichern.
     function setCurrentCapital(event: Event): void {
         let capital: number = Number(((event.currentTarget as Document).activeElement as HTMLInputElement).value);
-        currentCapital = capital;
+        currentCapital = capital * 100;
         console.log(currentCapital);
         document.getElementById("amountOnPage").innerHTML = currentCapital.toString();
-        document.getElementById("kapitalAmount").innerHTML = currentCapital.toString();
-
-        moneyCount = capital; //moneycount wird zu dem Wert aus dem Regler, somit mit das Aktuelle Kapital für die restlichen Funktionen.
+        document.getElementById("currentCapital").innerHTML = currentCapital.toString();
     }
 
 
@@ -159,40 +278,14 @@ let needFertilizer: number =1;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    //TODO: RANDOM WERT AUS ARRAY AUSGEBEN LASSEN, der SICH NACH EINER ZEIT WIEDER ÄNDERT
-
-    //Preis anzeigen
-    function choosepricePotato(_event: Event): void {
-        let sellTestCarrot: HTMLElement = document.querySelector("#anotherTestButton");
-        sellTestCarrot.addEventListener("click", giveOutPricePotato);
-    }
-
-    function giveOutPricePotato(_event: Event): void {
-        document.getElementById("pricePotatoCash").innerHTML = pricePotato20.toString();
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    //TODO: Funktion läuft unsichtbar weiter, auch wenn das Kapital 0 ist.
+    
 
     //Dünger-Mittel aus dem Shop kaufen + Invetar Gutschrift - ShopKaital
 
-    function buyFertilizer(_event: Event): void {
-        let shopFertilizer: HTMLElement = <HTMLElement>document.querySelector("#buyFertilizer");      //Kauf-Button aus dem DOM ansprechen.
-        shopFertilizer.addEventListener("click", buyFertilizerFunction);                              //Eventlistener mit dem Event "click" - für die buySeedsFunction.
-    }
-    function buyFertilizerFunction(_event: MouseEvent): void {
-        let actualMoney: number = moneyCount - priceFertilizer; //Einfache Rechnung der Variablen um aktualiserten Bedarf nach Kauf zu erlangen.
-        fertilizerAmount++;                                     //Inventarbestand wird erhöht.
-        moneyCount = actualMoney;                               //Oben deklarierte Varibale moneyCount wird durch die Rechnung acutalMoney getauscht.
-        if (actualMoney < 0) {                                  //If Anweisung, um zu überprüfen, ob das Kapital bei 0 liegt.
-            alert("Du hast kein Geld mehr!");                   //Meldung, damit der Spieler aufgrund des Kapitals keine weiteren Rohstoffe mehr kaufen kann.
-            return;                                             //Zurück zur Funktion, der Wert vom Kapital ist 0.
-        } else {
-            document.getElementById("amountFertilizier").innerHTML = fertilizerAmount.toString();   //Aktualisierten Inventarbestand im DOM ändern.
-            document.getElementById("kapitalAmount").innerHTML = actualMoney.toString();             //Aktualisertes Kapital im DOM ändern.
-        }
-    }
+
 
 
     //Dünger verwenden (Theoretische Funktion - funktioniert)
@@ -207,104 +300,13 @@ let needFertilizer: number =1;
     }
 
 
-    //Pestiziden-Mittel aus dem Shop kaufen + Invetar Gutschrift - ShopKaital
 
-    function buyPestizide(_event: Event): void {
-        let shopPestizide: HTMLElement = <HTMLElement>document.querySelector("#buyPestizide");
-        shopPestizide.addEventListener("click", buyPestizideFunction);
-    }
-    function buyPestizideFunction(_event: MouseEvent): void {
-        let actualMoney: number = moneyCount - pricePesticides;
-        pestizideAmount++;
-        moneyCount = actualMoney;
-        if (actualMoney < 0) {
-            alert("Du hast kein Geld mehr!");
-            return;
-        } else {
-            document.getElementById("amountPestizide").innerHTML = pestizideAmount.toString();
-            document.getElementById("kapitalAmount").innerHTML = actualMoney.toString();
-        }
-    }
-
-    //Pestiziden-Mittel verwenden (Theoretische Funktion - funktioniert)
-    function selectPestizide(_event: Event): void {
-        let chooseFertiliizer: HTMLElement = <HTMLElement>document.querySelector("#testUse2");
-        chooseFertiliizer.addEventListener("click", usePestizide);
-    }
-
-    function usePestizide(_event: MouseEvent): void {
-        pestizideAmount--;
-        document.getElementById("amountPestizide").innerHTML = pestizideAmount.toString();
-    }
-
-    //Setzlinge aus dem Shop kaufen + Invetar Gutschrift - ShopKaital
-
-    function buySaplings(_event: Event): void {
-        let shopSappling: HTMLElement = <HTMLElement>document.querySelector("#buySapling");
-        shopSappling.addEventListener("click", buySaplingFunction);
-    }
-    function buySaplingFunction(_event: MouseEvent): void {
-        let actualMoney: number = moneyCount - priceSeeds;
-        saplingAmount++;
-        moneyCount = actualMoney;
-        if (moneyCount < 0) {
-            alert("Du hast kein Cash mehr!");
-            return;
-        } else {
-            document.getElementById("amountSaplingCount").innerHTML = saplingAmount.toString();
-            document.getElementById("kapitalAmount").innerHTML = actualMoney.toString();
-        }
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    //GEMÜSE VERKAUFEN (SOON ERNTEN) + KAPITAL GUTSCHRIFT / VERLUST
 
 
-    //Karotte verkaufen            + Kapital Gutschrift
-    function chooseSellCarrot(_event: Event): void {
-        let sellTestCarrot: HTMLElement = document.querySelector("#sellCarrot");
-        sellTestCarrot.addEventListener("click", sellCarrot);
-    }
 
-    function sellCarrot(_event: Event): void {
-        let actualMoney: number = moneyCount + priceCarrot;                 //Einfache Rechnung der Variablen um aktualisertes Kapital nach Verkauf zu erlangen.           
-        moneyCount = actualMoney;
-        document.getElementById("kapitalAmount").innerHTML = actualMoney.toString();
-        //if (moneyCount > 50.50) {
-        //alert("Du hast deine ersten 55€ erwirtschaftet!");
-        //}
-    }
-
-    //Potato Verkaufen + Kapital Gutschrift
-    function chooseSellPotato(_event: Event): void {
-        let sellTestCarrot: HTMLElement = document.querySelector("#sellPotato");
-        sellTestCarrot.addEventListener("click", sellPotato);
-    }
-
-    function sellPotato(_event: Event): void {
-        let actualMoney: number = moneyCount + pricePotato;
-        moneyCount = actualMoney;
-        document.getElementById("kapitalAmount").innerHTML = actualMoney.toString();
-        //if (moneyCount > 50.50) {
-        //    alert("Du hast deine ersten 55€ erwirtschaftet!");
-        //}
-    }
-
-    //Melone Verkaufen + Kapital Gutschrift
-    function chooseSellMelon(_event: Event): void {
-        let sellTestMelon: HTMLElement = document.querySelector("#sellMelon");
-        sellTestMelon.addEventListener("click", sellMelon);
-    }
-
-    function sellMelon(_event: Event): void {
-        let actualMoney: number = moneyCount + priceMelon;
-        moneyCount = actualMoney;
-        document.getElementById("kapitalAmount").innerHTML = actualMoney.toString();
-        //if (moneyCount > 50.50) {
-        //    alert("Du hast deine ersten 55€ erwirtschaftet!");
-        //}
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -318,7 +320,6 @@ let needFertilizer: number =1;
         currentTool = selectedTool;
         currentTool.style.backgroundColor = "rgba(150, 150, 150, 0.75)";        //Hintergrund des ausgewählten Werkzeugs grau markieren.
         console.log(currentTool);
-
     }
 
 
@@ -365,85 +366,26 @@ let needFertilizer: number =1;
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //Die verschiedenen Gemüsesorten auswählen.
-
+    //TODO: ergänzen der Gemüseauswahl
     function selectSapling(selectedSapling: HTMLImageElement): void {
-        if (currentSapling != undefined) {
-            currentSapling.style.backgroundColor = "transparent";
+        clearImageSelection();
+        currentSaplingImg = selectedSapling;
+        currentSaplingImg.style.backgroundColor = "rgba(150, 150, 150, 0.75)";
+        switch (currentSaplingImg.id) {
+            case "iconCarrot":
+                currentSaplingType = SaplingType.CARROT;
+                break;
+            case "iconPotato":
+                currentSaplingType = SaplingType.POTATO;
+                break;
         }
-        currentSapling = selectedSapling;
-        currentSapling.style.backgroundColor = "rgba(150, 150, 150, 0.75)";
-        console.log(currentSapling);
+        console.log(currentSaplingType);
     }
 
-    function handleCanvasClick(_event: Event): void {
-        canvas = <HTMLCanvasElement>document.getElementById("canvas");
-        canvas.addEventListener("click", (event) => { plantSapling(event); });
-    }
-
-
-    //Kartoffeln auswählen
-    function handlePotatoClick(_event: Event): void {
-        let choosePotato: HTMLElement = <HTMLElement>document.querySelector("img#iconPotato");
-        choosePotato.addEventListener("click", clickPotato);
-    }
-
-    function clickPotato(event: MouseEvent): void {
-        let imgElement: HTMLImageElement = event.currentTarget as HTMLImageElement;
-        selectSapling(imgElement);
-        console.log(currentSaplingImg);
-        currentSaplingImg = imgElement.src;
-    }
-
-    //Rote-Zwiebeln auswählen
-    function handleRedOnionClick(_event: Event): void {
-        let chooseRedOnion: HTMLElement = <HTMLElement>document.querySelector("img#iconRedonion");
-        chooseRedOnion.addEventListener("click", clickRedOnion);
-    }
-
-    function clickRedOnion(_event: MouseEvent): void {
-        let imgElement: HTMLImageElement = event.currentTarget as HTMLImageElement;
-        selectSapling(imgElement);
-        console.log(currentSaplingImg);
-        currentSaplingImg = imgElement.src;
-    }
-
-    //Melonen auswählen
-    function handleWaterMelonClick(_event: Event): void {
-        let chooseWaterMelon: HTMLElement = <HTMLElement>document.querySelector("img#iconMelon");
-        chooseWaterMelon.addEventListener("click", clickWaterMelon);
-    }
-
-    function clickWaterMelon(_event: MouseEvent): void {
-        let imgElement: HTMLImageElement = event.currentTarget as HTMLImageElement;
-        selectSapling(imgElement);
-        console.log(currentSaplingImg);
-        currentSaplingImg = imgElement.src;
-    }
-
-    //RoteBeete auswählen
-    function handleBeetRootClick(_event: Event): void {
-        let chooseWaterMelon: HTMLElement = <HTMLElement>document.querySelector("img#iconBeetroot");
-        chooseWaterMelon.addEventListener("click", clickBeetRoot);
-    }
-
-    function clickBeetRoot(_event: MouseEvent): void {
-        let imgElement: HTMLImageElement = event.currentTarget as HTMLImageElement;
-        selectSapling(imgElement);
-        console.log(currentSaplingImg);
-        currentSaplingImg = imgElement.src;
-    }
-
-    //Karotte auswählen
-    function handleCarrotClick(_event: Event): void {
-        let chooseWaterMelon: HTMLElement = <HTMLElement>document.querySelector("img#iconCarrot");
-        chooseWaterMelon.addEventListener("click", clickCarrot);
-    }
-
-    function clickCarrot(event: MouseEvent): void {
-        let imgElement: HTMLImageElement = event.currentTarget as HTMLImageElement;
-        selectSapling(imgElement);
-        console.log(currentSaplingImg);
-        currentSaplingImg = imgElement.src;
+    function clearImageSelection(): void {
+        chooserImages.forEach(chooserImage => {
+            chooserImage.style.backgroundColor = "transparent";
+        });
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -461,41 +403,79 @@ let needFertilizer: number =1;
         console.log("init");
     }
 
+    //TODO Überprüfen ob Kapital >=0 wenn preis der pflanze abgezogen wurde
     function plantSapling(event: MouseEvent): void {
-        //let canvas = <HTMLCanvasElement>document.getElementById("canvas");
-        let mouseX = (event as MouseEvent).pageX;
-        let mouseY = (event as MouseEvent).pageY;
+        let mouseX: number = (event as MouseEvent).pageX;
+        let mouseY: number = (event as MouseEvent).pageY;
         mouseX -= 100;
         mouseY -= 100;
-        drawSapling(context, mouseX, mouseY);
-        event = undefined;
-    }
+        let field: [number, number] = getClickedField(mouseX, mouseY);
 
-    function drawSapling(context: CanvasRenderingContext2D, x: number, y: number): void {
-        let field: [number, number] = getClickedField(x, y);
-        let sapling: SaplingType = patch[field[0]][field[1]];
-        if (sapling == SaplingType.EMPTY) {
-            let img: HTMLImageElement = document.createElement("img");
-            let width: number = 75;
-            let height: number = 75;
-            let xDraw: number = field[1] * fieldSize + fieldSize / 2 - width / 2;
-            let yDraw: number = field[0] * fieldSize + fieldSize / 2 - height / 2;
-            img.src = currentSaplingImg; //`./Assets/${imageName}`;
-            context.drawImage(img, xDraw, yDraw, width, height);
-            patch[field[0]][field[1]] = SaplingType.CARROT;
-            console.log("Setzling gepflanzt");
+        let sapling: Sapling = newSapling(field);
+        let currentPatchField: Sapling = patch[PATCH_COLS * field[0] + field[1]];
+        if (currentPatchField == undefined && sapling != undefined) {
+            drawSapling(sapling, context);
+            event = undefined;
+            currentCapital = decreaseCapital(currentCapital, sapling.getSaplingPriceInCent());
         }
     }
 
+    function decreaseCapital(value: number, decrease: number): number {
+        let currentCapitalElement: HTMLElement = document.getElementById("currentCapital");
+        value -= decrease;
+        currentCapitalElement.innerHTML = value.toString();
+        return value;
+    }
+
+
+    //TODO: alle Saplings ergänzen
+    function newSapling(field: number[]): Sapling {
+
+        let sapling: Sapling;
+
+        switch (currentSaplingType) {
+            case SaplingType.CARROT:
+                sapling = new Sapling(currentSaplingType, currentPriceCarrot, [3000, 3000, 3000, 3000], field, ["carrot1", "carrot2", "carrot3", "carrot4"], currentSaplingImg, context);
+                break;
+            case SaplingType.POTATO:
+                sapling = new Sapling(currentSaplingType, currentPriceCarrot, [5000, 5000, 5000, 5000], field, ["potato1", "potato2", "potato3", "potato4"], currentSaplingImg, context); //TODO potato price ändern. currentPricePotato
+                break;
+            default:
+                return undefined;
+        }
+        return sapling;
+    }
+
+    function drawSapling(sapling: Sapling, context: CanvasRenderingContext2D): void {
+        let img: HTMLImageElement = document.createElement("img");
+        let width: number = 75;
+        let height: number = 75;
+        let xDraw: number = sapling.getField()[1] * FIELD_SIZE + FIELD_SIZE / 2 - width / 2;
+        let yDraw: number = sapling.getField()[0] * FIELD_SIZE + FIELD_SIZE / 2 - height / 2;
+
+        img.src = sapling.getImgPhaseNames()[sapling.getCurrentSaplingPhase()];
+        img.alt = "Sapling";
+
+        img.onload = function (): void {
+            context.drawImage(img, xDraw, yDraw, width, height);
+        };
+
+        context.drawImage(img, xDraw, yDraw, width, height);
+
+        patch[PATCH_COLS * sapling.getField()[0] + sapling.getField()[1]] = sapling;
+        console.log("Setzling gepflanzt");
+
+    }
+
     function getClickedField(x: number, y: number): [number, number] {
-        let row: number = Math.floor(y / fieldSize);
-        let col: number = Math.floor(x / fieldSize);
+        let row: number = Math.floor(y / FIELD_SIZE);
+        let col: number = Math.floor(x / FIELD_SIZE);
         return [row, col];
     }
 
     function drawFields(rows: number, cols: number): void {
-        drawVerticalLines(context, cols, height, fieldSize);
-        drawHorizontalLines(context, rows, width, fieldSize);
+        drawVerticalLines(context, cols, CANVAS_HEIGHT, FIELD_SIZE);
+        drawHorizontalLines(context, rows, CANVAS_WIDTH, FIELD_SIZE);
 
     }
 
@@ -527,31 +507,64 @@ let needFertilizer: number =1;
         context.stroke();
     }
 
+    function redraw(context: CanvasRenderingContext2D): void {
+        context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        drawFields(PATCH_ROWS, PATCH_COLS);
+
+        patch.forEach(sapling => {
+            if (sapling != undefined) {
+                switch (sapling.getSaplingType()) {
+                    case SaplingType.CARROT:
+                        drawSapling(sapling, context);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        });
+    }
+
+    // ===== Handler =====
+    function handleCanvasClick(_event: Event): void {
+        canvas = <HTMLCanvasElement>document.getElementById("canvas");
+        canvas.addEventListener("click", (event) => { plantSapling(event); });
+    }
+
+    //Kartoffeln auswählen
+    function handlePotatoClick(_event: Event): void {
+        let choosePotato: HTMLElement = <HTMLElement>document.querySelector("img#iconPotato");
+        choosePotato.addEventListener("click", clickImage);
+    }
+
+    //Rote-Zwiebeln auswählen
+    function handleRedOnionClick(_event: Event): void {
+        let chooseRedOnion: HTMLElement = <HTMLElement>document.querySelector("img#iconRedonion");
+        chooseRedOnion.addEventListener("click", clickImage);
+    }
+
+    //Melonen auswählen
+    function handleWaterMelonClick(_event: Event): void {
+        let chooseWaterMelon: HTMLElement = <HTMLElement>document.querySelector("img#iconMelon");
+        chooseWaterMelon.addEventListener("click", clickImage);
+    }
+
+    //RoteBeete auswählen
+    function handleBeetRootClick(_event: Event): void {
+        let chooseRedBeet: HTMLElement = <HTMLElement>document.querySelector("img#iconBeetroot");
+        chooseRedBeet.addEventListener("click", clickImage);
+    }
 
 
+    //Karotte auswählen
+    function handleCarrotClick(_event: Event): void {
+        let chooseWaterMelon: HTMLElement = <HTMLElement>document.querySelector("img#iconCarrot");
+        chooseWaterMelon.addEventListener("click", clickImage);
+    }
 
-
-
-
-
-
-
-
+    function clickImage(event: MouseEvent): void {
+        let imgElement: HTMLImageElement = event.currentTarget as HTMLImageElement;
+        chooserImages.push(imgElement);
+        selectSapling(imgElement);
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
