@@ -1,5 +1,5 @@
 "use strict";
-//in Zusammenarbeit mit Neele Rauber, Aileen Akin und Tim Nees und mit der Hilfe von Lukas Muschal
+//in Zusammenarbeit mit Dino und Alessia und mit der Hilfe von Lukas Muschal
 var A10_BlumenwiesePolymorphie;
 (function (A10_BlumenwiesePolymorphie) {
     window.addEventListener("load", handleLoad);

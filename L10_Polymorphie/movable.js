@@ -2,6 +2,9 @@
 var A10_BlumenwiesePolymorphie;
 (function (A10_BlumenwiesePolymorphie) {
     class Moveable {
+        position;
+        velocity;
+        size;
         //konstruieren der Biene
         constructor(_position) {
             //console.log("Move Constructor");

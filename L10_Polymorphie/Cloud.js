@@ -2,6 +2,11 @@
 var A10_BlumenwiesePolymorphie;
 (function (A10_BlumenwiesePolymorphie) {
     class Cloud extends A10_BlumenwiesePolymorphie.Moveable {
+        position;
+        velocity;
+        size;
+        x;
+        y;
         constructor(_size, _position) {
             super(_position);
             if (_position)

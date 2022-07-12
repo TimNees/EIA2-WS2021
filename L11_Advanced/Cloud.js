@@ -2,6 +2,11 @@
 var A11_BlumenwieseAdvanced;
 (function (A11_BlumenwieseAdvanced) {
     class Cloud extends A11_BlumenwieseAdvanced.Moveable {
+        position;
+        velocity;
+        size;
+        x;
+        y;
         constructor(_size, _position) {
             super(_position);
             if (_position)

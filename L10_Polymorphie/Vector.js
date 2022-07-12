@@ -2,6 +2,8 @@
 var A10_BlumenwiesePolymorphie;
 (function (A10_BlumenwiesePolymorphie) {
     class Vector {
+        x;
+        y;
         constructor(_x, _y) {
             this.set(_x, _y);
         }

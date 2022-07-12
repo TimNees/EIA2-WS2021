@@ -2,6 +2,8 @@
 var A11_BlumenwieseAdvanced;
 (function (A11_BlumenwieseAdvanced) {
     class Vector {
+        x;
+        y;
         constructor(_x, _y) {
             this.set(_x, _y);
         }

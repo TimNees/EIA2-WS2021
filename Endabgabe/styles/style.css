@@ -1,10 +1,8 @@
 body{
-    background-image: url(Assets/Background.jpg);
+    background-image: url(../Assets/Background.jpg);
     font-size: 20px;
     font-family: Arial, Helvetica, sans-serif;
 }
-
-
 
 #settings {
     width: 500px;
@@ -14,15 +12,13 @@ body{
     top: 100px;
     left: 500px;
     border-radius: 3px 15px 5px 30px;
-    background: url(Assets/workSpace.png);
+    background: url(../Assets/workSpace.png);
 }
 
 
 #priceRangeSetting{
     text-align: center;
 }
-
-
 
 #gemuseGarten {
     position: absolute;
@@ -107,29 +103,6 @@ body{
     top: 350px;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #moneyCount {
     height: 25px;
     width: 25px;
@@ -154,11 +127,6 @@ body{
 
 }
 
-
-
-
-
-
 #functionVegetable{
     position: absolute;
     left: 100px;
@@ -167,10 +135,9 @@ body{
     height: 200px;
     width: 1200px;
     border-radius: 3px 15px 5px 30px;
-    background: url(Assets/workSpace.png);
+    background: url(../Assets/workSpace.png);
     
 }
-
 
 #headlineFunction{
     font-size: 20px;
@@ -195,7 +162,7 @@ body{
     background-color: aqua;
     height: 500px;
     width: 300px;
-    background: url(Assets/workSpace.png);
+    background: url(../Assets/workSpace.png);
     color: white;
     text-align: center;
 }
@@ -207,7 +174,7 @@ body{
     background-color: aqua;
     height: 500px;
     width: 300px;
-    background: url(Assets/workSpace.png);
+    background: url(../Assets/workSpace.png);
     color: white;
     text-align: center;
 }
@@ -251,10 +218,5 @@ body{
 }
 
 #canvas{
-    background: url(Assets/vegetablePatch.png);
+    background: url(../Assets/vegetablePatch.png);
 }
-
-#testSapling{
-    
-}
-

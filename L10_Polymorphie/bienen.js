@@ -2,6 +2,9 @@
 var A10_BlumenwiesePolymorphie;
 (function (A10_BlumenwiesePolymorphie) {
     class Bee extends A10_BlumenwiesePolymorphie.Moveable {
+        position;
+        velocity;
+        size;
         //konstruieren der Biene
         constructor(_position) {
             super(_position);

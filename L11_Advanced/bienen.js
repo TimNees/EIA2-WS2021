@@ -2,6 +2,9 @@
 var A11_BlumenwieseAdvanced;
 (function (A11_BlumenwieseAdvanced) {
     class Bee extends A11_BlumenwieseAdvanced.Moveable {
+        position;
+        velocity;
+        size;
         //konstruieren der Biene
         constructor(_position) {
             super(_position);

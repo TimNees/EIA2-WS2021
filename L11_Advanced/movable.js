@@ -2,6 +2,8 @@
 var A11_BlumenwieseAdvanced;
 (function (A11_BlumenwieseAdvanced) {
     class Moveable {
+        position;
+        velocity;
         //konstruieren der Biene
         constructor(_position) {
             //console.log("Move Constructor");
