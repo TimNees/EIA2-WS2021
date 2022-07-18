@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EIA Endabgabe 2022 von Tim Nees</title>
+    <link rel="stylesheet" href="../styles/style.css">
+
+    <script src="../script/fly.js"></script>
+    <script src="../script/helper.js"></script>
+    <script src="../script/gameobject.js"></script>
+    <script src="../script/player.js"></script>
+    <script src="../script/market.js"></script>
+    <script src="../script/gamepage.js"></script>
+</head>
+
+<body>
+    <div id="secondPage">
+  
+        <div id="functionVegetable">
+            <p id="gemueseWahlen">Gemüse auswählen </p> 
+            <p id="funktionWahlen">Tool auswählen </p> 
+            <img id="iconCarrot" class="sapling" src="../Assets/carrot.png" width="100px" height="100px">
+            <img id="iconPotato" class="sapling" src="../Assets/potato.png" width="100px" height="100px">
+            <img id="iconRedOnion" class="sapling" src="../Assets/redonion.png" width="100px" height="100px">
+            <img id="iconBeetRoot" class="sapling" src="../Assets/beetroot.png" width="100px" height="100px">
+            <img id="iconMelon" class="sapling" src="../Assets/melon.png" width="100px" height="100px">
+            <img id="placeHolder"  src="../Assets/placeHolder.png" width="100px" height="100px">
+            <img id="iconHarvester" class="tool" title="Pflanze ernten" src="../Assets/harvest.png" width="100px"height="100px"> 
+            <img id="iconWater" class="tool" title="Pflanze gießen" src="../Assets/watering.png" width="100px"height="100px">
+            <img id="iconFertilizer" class="tool" title="Pflanze düngern" src="../Assets/fortizizePlants.png" width="100px" height="100px">
+            <img id="iconPesticide" class="tool" title="Schädling bekämpfen" src="../Assets/fightPest.png" width="100px"height="100px">
+            <p class="ueberschriftText"> Einkaufspreise: Karotte 0.80€, Kartoffel: 2.50€, Rotezwiebel 1.00€, Rote-Beete 3.00€, Melone 4.00€, </p>
+
+        </div>
+
+        <h1 id="gemuseGarten"> Gemüsegarten-Simulator </h1>
+
+        <div id="fieldGarden">
+            <canvas id="canvas" height="500" width="800"> </canvas>
+        </div>
+
+        <div id="shopMenu">
+            <br>
+            <div id="kapital">Dein Kapital in € </div>
+            <div id="currentCapital"> 15.00 </div> <br>
+
+            <div id="shopFont">Shop: </div>
+
+            <button id="buyFertilizer">Dünger-Mittel kaufen</button> <br>
+            <button id="buyPesticide">Pestiziden-Mittel kaufen</button> <br>
+            <p class="ueberschriftText">Einkaufspreise: Dünger: 5.00€ Pestiziden-Mittel: 8.70€</p>
+
+            <div id="inventory"> Dein Inventar </div>
+            <br>
+            <p class="ueberschriftText">Düngerbestand<p> 
+            <p id="amountFertilizier">0</p> 
+            <p class="ueberschriftText">Pestizidenbestand<p>
+            <p id="amountPesticide">0</p>
+            <br>
+            <div id="shopMenuTwo">
+                <p class="ueberschriftText"> Verkaufswerte: </p>
+                <p class="ueberschriftText"> VerkaufsWert Karotte (€) <img src="../Assets/carrot.png" width="20px" height="20px"> </p>
+                
+                <p id="priceCarrot"> 0.6 <p>
+                <p class="ueberschriftText"> VerkaufsWert Kartoffel (€)<img src="../Assets/potato.png" width="20px" height="20px"><p>
+                <div id="pricePotato"> 0.6 </div>
+                <p class="ueberschriftText"> VerkaufsWert R.Zwiebel (€)<img src="../Assets/redonion.png" width="20px" height="20px"><p>
+                <div id="priceRedOnion"> 0.6 </div>
+                <p class="ueberschriftText"> VerkaufsWert Rote-Beete (€)<img src="../Assets/beetroot.png" width="20px" height="20px"><p>
+                <div id="priceBeetRoot"> 0.6 </div>
+                <p class="ueberschriftText"> VerkaufsWert Melone(€)<img src="../Assets/melon.png" width="20px" height="20px"><p>
+                <p id="priceMelon"> 0.6 <p>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+</body>
+
+</html>
