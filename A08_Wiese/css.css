@@ -1,0 +1,26 @@
+body{
+    
+    font-family: helvetica, arial, sans-serif;
+    margin:0;
+    padding:0;
+  }
+  #header {
+   
+    width:2560px;
+    height: 1440px;
+  }
+  p {
+    text-align:center;
+  }
+  a {
+    display: inline-block;
+    color:#FFF;
+  }
+  h1 {
+    font-size: 22px;
+    text-align: center;
+    color: white;
+    font-weight: normal;
+    margin: 20px 0;
+  }
+  
