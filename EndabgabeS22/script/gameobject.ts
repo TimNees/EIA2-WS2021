@@ -19,10 +19,10 @@ namespace GemueseGarten {
         }
     }
 
-    export abstract class Sapling extends GameObject {
+    export abstract class Sapling extends GameObject {          //Erbt von GameObject
         private readonly assetFolderPath: string = "../Assets/Seeds/";
-        private saplingImagePaths: string[];
-        private growPhase: number;
+        private saplingImagePaths: string[];                            //Sapling der angezeigt wird, wenn er gesetzt wird und beim wachsen.
+        private growPhase: number;                                      //Die Phase des Saplinsgs
 
         private needsWater: boolean;
         private needsFertilizer: boolean;
