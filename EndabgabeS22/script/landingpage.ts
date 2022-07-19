@@ -24,7 +24,7 @@ namespace GemuseKarten {
 
     function handleStartGameClick(_event: Event): void {                                                         
         let startCapitalInput: HTMLInputElement = <HTMLInputElement>document.getElementById("startGame");           
-        startCapitalInput.addEventListener("click", startGame);                                             //Event-Listener vom Type "click" auf dem mit der Id "startGame" -> löst Funktion startGame auf.
+        startCapitalInput.addEventListener("click", startGame);                                   //Event-Listener vom Type "click" auf dem mit der Id "startGame" -> löst Funktion startGame auf.
     }
 
     function handleStartCapitalChange(_event: Event): void {

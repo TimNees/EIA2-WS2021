@@ -12,7 +12,7 @@ namespace GemueseGarten {
             return value;
         }
 
-        public static getClickedCell(x: number, y: number): [number, number] {
+        public static getClickedCell(x: number, y: number): [number, number] {      //Anhand von X,Y geben wir die angeklickte Zelle zurück.
             let row: number = Math.floor(y / 100);
             let col: number = Math.floor(x / 100);
             return [row, col];

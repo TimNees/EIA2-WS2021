@@ -1,7 +1,7 @@
 namespace GemueseGarten {
     export class Market {
         
-        private carrotPrice: number;                    //Deklaration der Eigenschaften
+        private carrotPrice: number;                    //Deklaration der (Klassen)Eigenschaften
         private potatoPrice: number;
         private beetRootPrice: number;
         private melonPrice: number;
@@ -178,8 +178,8 @@ namespace GemueseGarten {
         }
 
         private calculatingPriceChanges(): number {                                     //Mathematische Berechnung der Preisveränderung
-            let sign: number = Math.random() < 0.5 ? -1 : 1;
-            let change: number = (Math.floor(Math.random() * (3 - 1 + 1) + 1)) * 10 * sign;
+            let sign: number = Math.random() < 0.5 ? -1 : 1;    //Wenn Math.Random kleiner als 0.5 ist, dann liefer -1 zurück, ansonsten 1. (50% Chance ob Vorzeichen + oder -) Gefunden: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_Operator
+            let change: number = (Math.floor(Math.random() * (3 - 1 + 1) + 1)) * 10 * sign; //Die eigentliche Änderung wird berechnet zwischen -30 und +30 - durch herumspielen herausgefunden: https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Math/random
             //console.log(change); 
             return change;
         }

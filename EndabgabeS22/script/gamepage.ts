@@ -15,16 +15,15 @@ namespace GemueseGarten {
     export let player: Player;
     export let market: Market;
     export let fly: Fly;
-    let selectableObjects: Map<string, HTMLImageElement>;
-    let selectedImg: HTMLImageElement;
+    let selectedImg: HTMLImageElement;      //Das ausgewählte Image, entweder Pflanze oder Tool.
 
     export let plantedSaplings: Sapling[];
 
     //===== Canvas-Variablen =====
     let canvas: HTMLCanvasElement;
     export let context: CanvasRenderingContext2D;
-    let chooserImages: HTMLImageElement[] = new Array();
-    let clickedCanvasCell: [number, number];
+    let chooserImages: HTMLImageElement[] = new Array();    //Ausgewähltes Image (Tool oder Sapling)
+    let clickedCanvasCell: [number, number];                //Angeglickte Zelle auf Canvas
 
     //===== Working =====
     function workWithTool(): void {
@@ -33,7 +32,7 @@ namespace GemueseGarten {
     }
 
     function plantSapling(): void {
-        if (plantedSaplings[getSaplingIndex(clickedCanvasCell)] instanceof GameObject) {
+        if (plantedSaplings[getSaplingIndex(clickedCanvasCell)] instanceof GameObject) {  //Wenn an der Stelle an der wir geklickt haben nicht undefined ist, return. (Verhindert, dass man mehrere Karotten auf ein Feld setzen kann.)
             return;
         }
 
@@ -61,11 +60,11 @@ namespace GemueseGarten {
             return;
         }
 
-        let sapling: Sapling = GameObjectFactory.new(selectedImg, clickedCanvasCell) as Sapling;
+        let sapling: Sapling = GameObjectFactory.new(selectedImg, clickedCanvasCell) as Sapling; //Durch as Sapling schließen wir aus, dass es noch ein Tool sein könnte - so können wir es immer als Sapaling behandeln.
 
         player.setMoney(player.getMoney() - buyingPrice);                   //Der Preis für den Setzling wird vom Kapital des Nutzers abgebucht.
         drawSapling(sapling, context);                                      //Der Setzling wird auf dem Canvas gezeichnet
-        plantedSaplings[getSaplingIndex(clickedCanvasCell)] = sapling;
+        plantedSaplings[getSaplingIndex(clickedCanvasCell)] = sapling;      //An dem jeweiligen Index wird der Sapling gesetzt.
     }
 
 
@@ -74,17 +73,17 @@ namespace GemueseGarten {
         let img: HTMLImageElement = document.createElement("img");
         let width: number = 75;
         let height: number = 75;
-        let xDraw: number = sapling.getCell()[1] * CELL_SIZE + CELL_SIZE / 2 - width / 2;
+        let xDraw: number = sapling.getCell()[1] * CELL_SIZE + CELL_SIZE / 2 - width / 2;       //Wird berechnet, damit der Sapling in der Mitte der Zelle gezeichnet wird.
         let yDraw: number = sapling.getCell()[0] * CELL_SIZE + CELL_SIZE / 2 - height / 2;
 
         
-        img.src = sapling.getSaplingImagePaths()[sapling.getGrowPhase()];
+        img.src = sapling.getSaplingImagePaths()[sapling.getGrowPhase()];                       //Bild des Setzlings, von der Phase 0 (da es noch ein Setzling der Stufe 0 ist)wird ausgewählt.
 
-        img.onload = function (): void {
+        img.onload = function (): void {                                                //Code lief weiter auf schnellen PC (ist beim Testing aufgefallen, verhindert dass gezeichnet wird ohne das Element fertig ist.)
             context.drawImage(img, xDraw, yDraw, width, height);
         };
 
-        sapling.drawDisaster();
+        sapling.drawDisaster();                                                        //Wenn ein Disaster vorhanden ist, wird es in die untere rechte Ecke des Feldes gezeichnet.
         plantedSaplings[getSaplingIndex(sapling.getCell())] = sapling;
     }
 
@@ -137,10 +136,10 @@ namespace GemueseGarten {
     }
 
     export function redraw(): void {
-        context.clearRect(0, 0, WIDTH, HEIGHT);             //Die Methode clearRect sorgt mit Hilfe der angegebenen Paramater dafür, dass die Pixel transparent gesetzt werden.
-        drawFields();
+        context.clearRect(0, 0, WIDTH, HEIGHT);             //Die Methode clearRect leert das Canvas.
+        drawFields();                                       //Zeichnet wieder die Linien.
 
-        plantedSaplings.forEach(sapling => {
+        plantedSaplings.forEach(sapling => {                //Man geht alle Saplings durch und überprüfen, wenn nicht undefined ist -> wird der Sapling wieder gezeichnet.
             if (sapling != undefined) {
                 drawSapling(sapling, context);
             }
@@ -216,10 +215,10 @@ namespace GemueseGarten {
 
     //Click auf dem Canvas soll eine Funktion auslösen
     function clickCanvas(event: Event): void {
-        let mouseX: number = (event as MouseEvent).pageX;
+        let mouseX: number = (event as MouseEvent).pageX; 
         let mouseY: number = (event as MouseEvent).pageY;
-        mouseX -= 100;                                  // -100 weil das Event auf dem Canvas ausgelöst werden soll und das Canvas erst bei 100px beginnt - zu Beginn wurde so der ganze Bildschirm berechnet
-        mouseY -= 100;                                  // -100 weil das Event auf dem Canvas ausgelöst werden soll und das Canvas erst bei 100px beginnt.- zu Beginn wurde so der ganze Bildschirm berechnet
+        mouseX -= 100;                                  
+        mouseY -= 100;                                  
         clickedCanvasCell = Helper.getClickedCell(mouseX, mouseY);
 
         if (selectedImg == undefined) {                         //Sobald der Nutzer auf das Canvas gedrückt hat ohne eine Funktion auszuwählen, kam eine Error-Meldung in der Konsole.
@@ -237,10 +236,7 @@ namespace GemueseGarten {
             chooserImages.push(imgElement);
         }
 
-        if (!selectableObjects.has(imgElement.id)) {
-            selectableObjects.set(imgElement.id, imgElement);
-        }
-
+    
         selectSaplingTool(imgElement);
         selectedImg = imgElement;
     }
@@ -252,7 +248,6 @@ namespace GemueseGarten {
         handlePesticideButtonClick(event);
         handleFertilizerButtonClick(event);
 
-        selectableObjects = new Map();
 
         initCanvas();
 
@@ -261,15 +256,16 @@ namespace GemueseGarten {
 
         market.updatePrices();
 
-        let url: string = window.location.href;
-        let search: string = url.split("?")[1];
-        let vars: string[] = search.split("&");
+        let url: string = window.location.href; //Die URL der Webseite wird geholt - bsp. `./pages/game.html?currentCapital=50&currentPriceRange=0.4`
+        let search: string = url.split("?")[1]; //Nehmen nur den zweiten Teil (alles hinter dem Fragezeichen)
+        let vars: string[] = search.split("&"); //Splitten am & und erhalten 2 Strings currentCapital=50//currentPriceRange=0.4
         //console.log(vars);
 
-        let currentCapital: string = vars[0].split("=")[1];
-        let currentPriceRange: string = vars[1].split("=")[1]; 
-        player.setMoney(parseInt(currentCapital) * 100);
+        let currentCapital: string = vars[0].split("=")[1]; // 50 
+        let currentPriceRange: string = vars[1].split("=")[1]; // 0.4
+
+        player.setMoney(parseInt(currentCapital) * 100); //Spieler bekommt in € gezeigt, intern wird aber in Cent gerechnet.
         market.setPriceRange(parseFloat(currentPriceRange));
-        console.log("Test2");
+        console.log("Test2"); //Zum Testen, ob die Seite ordentlich geladen wird.
     };
 }
