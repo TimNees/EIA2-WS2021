@@ -24,26 +24,26 @@ namespace GemueseGarten {
         private saplingImagePaths: string[];                            //Sapling der angezeigt wird, wenn er gesetzt wird und beim wachsen.
         private growPhase: number;                                      //Die Phase des Saplinsgs
 
-        private needsWater: boolean;
+        private needsWater: boolean;                                    //Sind die 3 Disaster die eintreten können
         private needsFertilizer: boolean;
         private needsPesticide: boolean;
         private currentDisaster: string;
 
         constructor(iconImage: HTMLImageElement, saplingImageName: string, cell: [number, number]) {
-            super(iconImage, cell);
+            super(iconImage, cell);     //Ruft den Constructor von GameObject auf (Superklasse)
             this.saplingImagePaths = new Array();
             for (let i: number = 0; i < 4; i++) {
-                this.saplingImagePaths.push(this.assetFolderPath + saplingImageName + (i + 1) + ".png");
+                this.saplingImagePaths.push(this.assetFolderPath + saplingImageName + (i + 1) + ".png"); //i = 0, deshalb ist die erste Phase 1 und das ist carrot1.png (der Samen)
             }
             this.growPhase = 0;
 
-            this.needsWater = false;
+            this.needsWater = false;            //Am Anfang false, da sie nicht direkt mit einem Disaster starten sollen.
             this.needsFertilizer = false;
             this.needsPesticide = false;
             this.currentDisaster = "";
 
-            setTimeout(() => { this.grow(); }, 1000);
-            setTimeout(() => { this.checkDisaster(); }, 1000);
+            setTimeout(() => { this.grow(); }, 1000);           //Sekündlich wächst der Sapling.
+            setTimeout(() => { this.checkDisaster(); }, 1000);  //Sekündlich wird nach einem Disaster gecheckt.
         }
 
         public getSaplingImagePaths(): string[] {
